@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { memo, useEffect, useRef, } from "react";
 import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
 import List from "@editorjs/list";
@@ -47,7 +47,11 @@ const Editor: React.FC<{
 
     return () => {
       if (editorRef.current) {
-        editorRef.current.destroy();
+        try {
+          editorRef.current.destroy();
+        } catch (error) {
+          console.error("Error destroying editor:", error);
+        }
         editorRef.current = null;
       }
     };
@@ -65,6 +69,7 @@ const Editor: React.FC<{
   const initEditor = () => {
     if (editorRef.current) {
       editorRef.current.destroy();
+      editorRef.current = null;
     }
 
     const editor = new EditorJS({
@@ -84,9 +89,11 @@ const Editor: React.FC<{
         warning: Warning,
       },
       data: fileData?.document ? JSON.parse(fileData.document) : rawDocument,
+      onReady: () => {
+        editorRef.current = editor;
+      },
     });
 
-    editorRef.current = editor;
   };
 
   const onSaveDocument=()=>{
@@ -110,10 +117,8 @@ const Editor: React.FC<{
     }
   }
   return (
-    <div>
-      <div id="editorjs" className="ml-20"></div>
-    </div>
+      <div id="editorjs" className="ml-20" />
   );
 };
 
-export default Editor;
+export default memo(Editor) ;

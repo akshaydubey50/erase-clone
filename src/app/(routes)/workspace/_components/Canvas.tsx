@@ -1,5 +1,5 @@
 "use client";
-import React,{useState,useEffect} from "react";
+import React, { useState, useEffect, memo } from "react";
 import { FILE } from "../../dashboard/_components/FileList";
 import { Excalidraw, MainMenu, WelcomeScreen } from "@excalidraw/excalidraw";
 import { useMutation } from "convex/react";
@@ -10,57 +10,62 @@ const Canvas: React.FC<{
   fileId: string;
   fileData: FILE;
 }> = ({ onSaveTrigger, fileId, fileData }) => {
+  const [whiteBoardData, setWhiteBoardData] = useState();
 
-  const [whiteBoardData,setWhiteBoardData]=useState();
+  const UIOptions = {
+    canvasActions: {
+      dockedSidebarBreakpoint: 200,
+      saveToActiveFile: true,
+      loadScene: true, 
+    },
+  };
 
-  const updateWhiteboard=useMutation(api.files.updateWhiteboard)
+  const updateWhiteboard = useMutation(api.files.updateWhiteboard);
 
-  const saveWhiteboard=()=>{
+  const saveWhiteboard = () => {
     updateWhiteboard({
-        _id:fileId,
-        whiteboard:JSON.stringify(whiteBoardData)
-    }).then(resp=>console.log(resp))
-}
+      _id: fileId,
+      whiteboard: JSON.stringify(whiteBoardData),
+    }).then((resp) => console.log(resp));
+  };
 
-  useEffect(()=>{
-    onSaveTrigger&&saveWhiteboard();
-},[onSaveTrigger])
+  useEffect(() => {
+    onSaveTrigger && saveWhiteboard();
+  }, [onSaveTrigger]);
 
   return (
     <div style={{ height: "670px" }}>
-    {fileData&& <Excalidraw 
-     theme='light'
-     initialData={{
-         elements:fileData?.whiteboard&&JSON.parse(fileData?.whiteboard)
-     }}
-     onChange={(excalidrawElements, appState, files)=>
-         setWhiteBoardData(excalidrawElements)}
-     UIOptions={{
-         canvasActions:{
-             saveToActiveFile:false,
-             loadScene:false,
-             export:false,
-             toggleTheme:false
- 
-         }
-     }}
-     >
-         <MainMenu>
-             <MainMenu.DefaultItems.ClearCanvas/>
-             <MainMenu.DefaultItems.SaveAsImage/>
-             <MainMenu.DefaultItems.ChangeCanvasBackground/>
-         </MainMenu>
-         <WelcomeScreen>
-             <WelcomeScreen.Hints.MenuHint/>
-             <WelcomeScreen.Hints.MenuHint/>
-             <WelcomeScreen.Hints.ToolbarHint/>
-             <WelcomeScreen.Center>
-                 <WelcomeScreen.Center.MenuItemHelp/>
-             </WelcomeScreen.Center>
-         </WelcomeScreen>
-         </Excalidraw>}
+      {fileData && (
+        <Excalidraw
+          onChange={(excalidrawElements) => {
+            console.log(excalidrawElements);
+            setWhiteBoardData(excalidrawElements);
+          }}
+          UIOptions={UIOptions}
+        >
+          <MainMenu>
+            <MainMenu.DefaultItems.ClearCanvas />
+            <MainMenu.DefaultItems.SaveAsImage />
+            <MainMenu.DefaultItems.ChangeCanvasBackground />
+          </MainMenu>
+          <WelcomeScreen>
+          <WelcomeScreen.Center>
+            <WelcomeScreen.Center.Logo />
+            <WelcomeScreen.Center.Heading>
+              Welcome Screen Heading!
+            </WelcomeScreen.Center.Heading>
+            <WelcomeScreen.Center.Menu>
+              <WelcomeScreen.Center.MenuItemLink href="https://github.com/excalidraw/excalidraw">
+                Excalidraw GitHub
+              </WelcomeScreen.Center.MenuItemLink>
+              <WelcomeScreen.Center.MenuItemHelp />
+            </WelcomeScreen.Center.Menu>
+          </WelcomeScreen.Center>
+        </WelcomeScreen>
+        </Excalidraw>
+      )}
     </div>
   );
 };
 
-export default Canvas;
+export default memo(Canvas);
