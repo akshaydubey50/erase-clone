@@ -5,7 +5,8 @@ import { useConvex } from "convex/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SideNav from "./_components/SideNav";
-import { FileListContext } from "../../_context/FileListContext";
+import { FileListContext, } from "../../_context/FileListContext";
+import { FILE } from "./_components/FileList";
 
 function DashboardLayout({
   children,
@@ -14,10 +15,10 @@ function DashboardLayout({
 }>) {
   const convex = useConvex();
   const { user } = useKindeBrowserClient();
-  const [fileList_, setFileList_] = useState();
+  const [fileList_, setFileList_] = useState<FILE[]>([]);
   const router = useRouter();
   useEffect(() => {
-    user && checkTeam();
+    if(user){checkTeam()};
   }, [user]);
 
   const checkTeam = async () => {

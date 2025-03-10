@@ -22,14 +22,26 @@ export interface FILE {
   _id: string;
   _creationTime: number;
 }
-function FileList() {
-  const { fileList_, setFileList_ } = useContext(FileListContext);
-  const [fileList, setFileList] = useState<FILE[]>();
+
+const FileList: React.FC = () => {
+  const fileListContext = useContext(FileListContext);
+
+  if (!fileListContext) {
+    throw new Error(
+      "FileListContext must be used within a FileListContext.Provider"
+    );
+  }
+
+  const { fileList_ }: { fileList_: FILE[] } = fileListContext;
+  const [fileList, setFileList] = useState<FILE[]>([]);
   const { user } = useKindeBrowserClient();
   const router = useRouter();
+
   useEffect(() => {
-    fileList_ && setFileList(fileList_);
-    console.log(fileList_);
+    if (fileList_) {
+      console.log("fileList_::::::", fileList_);
+      setFileList(fileList_);
+    }
   }, [fileList_]);
 
   return (
@@ -38,26 +50,29 @@ function FileList() {
         <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
           <thead className="ltr:text-left rtl:text-right">
             <tr>
-              <td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+              <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                 File Name
-              </td>
-              <td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+              </th>
+              <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                 Created At
-              </td>
-              <td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+              </th>
+              <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                 Edited
-              </td>
-              <td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+              </th>
+              <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                 Author
-              </td>
+              </th>
+              <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                Actions
+              </th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-gray-200">
-            {fileList &&
-              fileList?.map((file: FILE, index: number) => (
+            {fileList.length > 0 ? (
+              fileList.map((file) => (
                 <tr
-                  key={index}
+                  key={file._id}
                   className="odd:bg-gray-50 cursor-pointer"
                   onClick={() => router.push("/workspace/" + file._id)}
                 >
@@ -65,16 +80,16 @@ function FileList() {
                     {file.fileName}
                   </td>
                   <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    {moment(file._creationTime).format("DD MMM YYYY")}{" "}
+                    {moment(file._creationTime).format("DD MMM YYYY")}
                   </td>
                   <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                     {moment(file._creationTime).format("DD MMM YYYY")}
                   </td>
                   <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    {user && (
+                    {user?.picture && (
                       <Image
-                        src={user?.picture}
-                        alt="user"
+                        src={user.picture}
+                        alt="User"
                         width={30}
                         height={30}
                         className="rounded-full"
@@ -94,12 +109,22 @@ function FileList() {
                     </DropdownMenu>
                   </td>
                 </tr>
-              ))}
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="text-center px-4 py-2 text-gray-500"
+                >
+                  No files found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
     </div>
   );
-}
+};
 
 export default FileList;

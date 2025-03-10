@@ -5,7 +5,7 @@ import SideNavTopSection, { TEAM } from './SideNavTopSection'
 import { useConvex, useMutation } from 'convex/react'
 import { api } from '../../../../../convex/_generated/api'
 import { toast } from 'sonner'
-import { FileListContext } from '../../../_context/FileListContext'
+import { FileListContext ,FileListContextType} from '../../../_context/FileListContext'
 
 
 
@@ -14,18 +14,18 @@ export default function SideNav() {
   const createFile=useMutation(api.files.createFile);
   const [activeTeam,setActiveTeam]=useState<TEAM>();
   const convex=useConvex();
-  const [totalFiles,setTotalFiles]=useState<Number>();
-  const {fileList_,setFileList_}=useContext(FileListContext);
+  const [totalFiles,setTotalFiles]=useState<number>();
+  const {setFileList_}=useContext(FileListContext) as FileListContextType;
 
   useEffect(()=>{
-    activeTeam && getFiles();
+    if(activeTeam){getFiles()}
   },[activeTeam])
 
   const onFileCreate=(fileName:string)=>{
     console.log(fileName)
     createFile({
       fileName:fileName,
-      teamId:activeTeam?._id,
+      teamId:activeTeam?._id??"",
       createdBy:user?.email,
       archive:false,
       document:'',
@@ -37,16 +37,23 @@ export default function SideNav() {
         toast('File created successfully!')
       }
     },(e)=>{
+      console.error(e)
       toast('Error while creating file')
-
     })
   }
 
   const getFiles=async()=>{
-    const result=await convex.query(api.files.getFiles,{teamId:activeTeam?._id});
-    console.log(result);
+   try{
+    const result=await convex.query(api.files.getFiles,{teamId:activeTeam?._id??""});
+    console.log("result::::",result);
     setFileList_(result);
     setTotalFiles(result?.length)
+   }
+   catch(e){
+    setFileList_([]);
+    setTotalFiles(0)
+    console.log(e)
+   }
   }
 
   return (

@@ -9,6 +9,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import { toast } from "sonner";
 import { FILE } from "../../dashboard/_components/FileList";
+import { Id } from "../../../../../convex/_generated/dataModel";
 
 const rawDocument = {
   time: 1550476186479,
@@ -35,7 +36,7 @@ const rawDocument = {
 const Editor: React.FC<{
   onSaveTrigger: boolean;
   fileId: string;
-  fileData: FILE;
+  fileData: FILE|null;
 }> = ({ onSaveTrigger, fileId, fileData }) => {
   const editorRef = useRef<EditorJS|null>(null);
   const updateDocument = useMutation(api.files.updateDocument);
@@ -102,10 +103,10 @@ const Editor: React.FC<{
       editorRef.current.save().then((outputData) => {
         console.log('Article data: ', outputData);
         updateDocument({
-          _id:fileId,
+          _id:fileId as Id<"files">,
           document:JSON.stringify(outputData)
         }).then(resp=>{
-          
+            console.log("Document Updated:",resp);
             toast('Document Updated!')
           
         },(e)=>{

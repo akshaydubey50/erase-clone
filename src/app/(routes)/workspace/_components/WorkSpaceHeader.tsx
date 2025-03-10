@@ -7,10 +7,17 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-
 import { TabsContext } from '@/app/_context/FileListContext'
-const WorkSpaceHeader:React.FC =({onSave})=>{
-  const {activeTab,setActiveTab,handleTabsChange}=useContext(TabsContext);
+
+const WorkSpaceHeader:React.FC<{onSave:()=>void}>=({onSave})=>{
+  const tabsContext = useContext(TabsContext);
+
+  if (!tabsContext) {
+    throw new Error("WorkSpaceHeader must be used within a TabsContext.Provider");
+  }
+
+  const { activeTab, handleTabsChange } = tabsContext;
+  
   return (
     <div className='p-3 border-b flex justify-between items-center'>
     <div className='flex gap-2 items-center'>

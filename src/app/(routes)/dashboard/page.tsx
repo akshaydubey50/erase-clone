@@ -1,11 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
-  LogoutLink,
   useKindeBrowserClient,
 } from "@kinde-oss/kinde-auth-nextjs";
-import { useConvex, useMutation, useQuery } from "convex/react";
+import { useConvex, useMutation } from "convex/react";
 import React, { useEffect } from "react";
 import { api } from "../../../../convex/_generated/api";
 import { KindeUser } from "@/types";
@@ -19,7 +17,7 @@ export default function Home() {
   const convex = useConvex();
 
   const checkUser = async () => {
-    const result = await convex.query(api.user.getUser, { email: user?.email });
+    const result = await convex.query(api.user.getUser, { email: user?.email??"" });
     console.log("result:", result);
     if (!result) {
       createUser({

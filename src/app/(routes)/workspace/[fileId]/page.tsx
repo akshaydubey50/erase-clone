@@ -7,22 +7,31 @@ import { FILE } from "../../dashboard/_components/FileList";
 import Editor from "../_components/Editor";
 import Canvas from "../_components/Canvas";
 import { TabsContext } from "@/app/_context/FileListContext";
+import { Id } from "../../../../../convex/_generated/dataModel";
 
 export default function Workspace({ params }: { params: { fileId?: string } }) {
   const [triggerSave, setTriggerSave] = useState<boolean>(false);
   const convex = useConvex();
   const [fileData, setFileData] = useState<FILE | null>(null);
-  const { activeTab, setActiveTab } = useContext(TabsContext);
+  
+  const tabsContext = useContext(TabsContext);
+
+  if (!tabsContext) {
+    throw new Error("WorkSpaceHeader must be used within a TabsContext.Provider");
+  }
+  
+  const { activeTab } = tabsContext;
+  
 
   useEffect(() => {
     if (params.fileId) {
       getFileData(params.fileId);
     }
-  }, [params.fileId]); // Added dependency
+  }, [params.fileId]);
 
   const getFileData = async (fileId: string) => {
     try {
-      const result = await convex.query(api.files.getFileById, { _id: fileId });
+      const result = await convex.query(api.files.getFileById, { _id: fileId as Id<"files">});
       setFileData(result);
     } catch (error) {
       console.error("Error fetching file data:", error);
@@ -36,7 +45,7 @@ export default function Workspace({ params }: { params: { fileId?: string } }) {
         <div className="h-screen">
           <Editor
             onSaveTrigger={triggerSave}
-            fileId={params.fileId}
+            fileId={params.fileId??""}
             fileData={fileData}
           />
         </div>
@@ -45,7 +54,7 @@ export default function Workspace({ params }: { params: { fileId?: string } }) {
         <div className="h-screen">
           <Canvas
             onSaveTrigger={triggerSave}
-            fileId={params.fileId}
+            fileId={params.fileId??""}
             fileData={fileData}
           />
         </div>
@@ -55,14 +64,14 @@ export default function Workspace({ params }: { params: { fileId?: string } }) {
           <div className="h-screen">
             <Editor
               onSaveTrigger={triggerSave}
-              fileId={params.fileId}
+              fileId={params.fileId??""}
               fileData={fileData}
             />
           </div>
           <div className="h-screen border-l">
             <Canvas
               onSaveTrigger={triggerSave}
-              fileId={params.fileId}
+              fileId={params.fileId??""}
               fileData={fileData}
             />
           </div>

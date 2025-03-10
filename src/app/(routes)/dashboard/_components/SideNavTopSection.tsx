@@ -1,6 +1,6 @@
 import { ChevronDown, LayoutGrid, LogOut, Settings, Users } from 'lucide-react'
 import Image from 'next/image'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState,ElementType } from 'react'
 import {
     Popover,
     PopoverContent,
@@ -12,14 +12,27 @@ import { useConvex } from 'convex/react'
 import { api } from '../../../../../convex/_generated/api'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { KindeUser } from '@/types'
 
 export interface TEAM{
     createdBy:string,
     teamName:string,
     _id:string
 }
-function SideNavTopSection({user,setActiveTeamInfo}:any) {
-    const menu=[
+
+    export interface Menu{
+        id:number,
+        name:string,
+        path:string,
+        icon:ElementType
+    }
+
+interface SideNavTopSectionProps{
+    user:KindeUser;
+    setActiveTeamInfo: (team: TEAM) => void;
+}
+function SideNavTopSection({user,setActiveTeamInfo}:SideNavTopSectionProps) {
+    const menu:Menu[]=[
         {
             id:1,
             name:'Create Team',
@@ -38,20 +51,24 @@ function SideNavTopSection({user,setActiveTeamInfo}:any) {
     const [activeTeam,setActiveTeam]=useState<TEAM>();
     const [teamList,setTeamList]=useState<TEAM[]>();
     useEffect(()=>{
-        user&&getTeamList();
+        if(user){
+            getTeamList();
+        }
     },[user])
 
     useEffect(()=>{
-        activeTeam?setActiveTeamInfo(activeTeam):null
+        if(activeTeam){
+            setActiveTeamInfo(activeTeam);
+        }
     },[activeTeam])
     const getTeamList=async()=>{
-        const result=await convex.query(api.teams.getTeam,{email:user?.email})
+        const result=await convex.query(api.teams.getTeam,{email:user?.email??""})
         console.log("TeamList",result);
         setTeamList(result);
         setActiveTeam(result[0]);
     }
 
-    const onMenuClick=(item:any)=>{
+    const onMenuClick=(item:Menu)=>{
         if(item.path)
         {
             router.push(item.path);
@@ -94,7 +111,7 @@ function SideNavTopSection({user,setActiveTeamInfo}:any) {
                 <Separator className='mt-2 bg-slate-100'/>
                 {/* Option Section  */}
                 <div>
-                    {menu.map((item,index)=>(
+                    {menu?.map((item,index)=>(
                         <h2 key={index} className='flex gap-2 items-center
                         p-2 hover:bg-gray-100 rounded-lg cursor-pointer text-sm'
                         onClick={()=>onMenuClick(item)}>
@@ -111,7 +128,7 @@ function SideNavTopSection({user,setActiveTeamInfo}:any) {
                 <Separator className='mt-2 bg-slate-100'/>
                 {/* User Info Section  */}
                {user&& <div className='mt-2 flex gap-2 items-center'>
-                    <Image src={user?.picture} alt='user'
+                    <Image src={user?.picture??""} alt='user'
                     width={30}
                     height={30}
                     className='rounded-full'

@@ -4,13 +4,14 @@ import { FILE } from "../../dashboard/_components/FileList";
 import { Excalidraw, MainMenu, WelcomeScreen } from "@excalidraw/excalidraw";
 import { useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
+import { Id } from "../../../../../convex/_generated/dataModel";
 
 const Canvas: React.FC<{
   onSaveTrigger: boolean;
   fileId: string;
-  fileData: FILE;
+  fileData: FILE|null;
 }> = ({ onSaveTrigger, fileId, fileData }) => {
-  const [whiteBoardData, setWhiteBoardData] = useState();
+  const [whiteBoardData, setWhiteBoardData] = useState<any>(); 
 
   const UIOptions = {
     canvasActions: {
@@ -24,13 +25,15 @@ const Canvas: React.FC<{
 
   const saveWhiteboard = () => {
     updateWhiteboard({
-      _id: fileId,
+      _id: fileId as Id<"files">,
       whiteboard: JSON.stringify(whiteBoardData),
     }).then((resp) => console.log(resp));
   };
 
   useEffect(() => {
-    onSaveTrigger && saveWhiteboard();
+    if(onSaveTrigger){
+      saveWhiteboard();
+    }
   }, [onSaveTrigger]);
 
   return (
@@ -38,7 +41,7 @@ const Canvas: React.FC<{
       {fileData && (
         <Excalidraw
           onChange={(excalidrawElements) => {
-            console.log(excalidrawElements);
+            console.log("excalidrawElements:::",excalidrawElements);
             setWhiteBoardData(excalidrawElements);
           }}
           UIOptions={UIOptions}
